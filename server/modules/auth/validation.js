@@ -1,13 +1,37 @@
-const validateRegister = ({ fullName, email, password }) => {
-    if (!fullName || !email || !password) {
-        return "All fields are required.";
-    }
+const validateRegister = (data) => {
+  if (!data) {
+    return "Registration payload is required.";
+  }
 
-    if (password.length < 6) {
-        return "Password must be at least 6 characters.";
-    }
+  const { fullName, email, password } = data;
 
-    return null;
+  if (!fullName || !email || !password) {
+    return "All fields are required.";
+  }
+
+  if (password.length < 6) {
+    return "Password must be at least 6 characters.";
+  }
+
+  if (!/^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/.test(email)) {
+    return "A valid email address is required.";
+  }
+
+  return null;
 };
 
-export { validateRegister };
+const validateLogin = (data) => {
+  if (!data) {
+    return "Login payload is required.";
+  }
+
+  const { email, password } = data;
+
+  if (!email || !password) {
+    return "Email and password are required.";
+  }
+
+  return null;
+};
+
+export { validateRegister, validateLogin };

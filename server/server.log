@@ -1,0 +1,4 @@
+nohup: ignoring input
+◇ injected env (3) from .env // tip: ⌘ override existing { override: true }
+🚀 Server is running on port 5000
+✅ MongoDB Connected: ac-h6dyc8h-shard-00-01.ekgb5dv.mongodb.net

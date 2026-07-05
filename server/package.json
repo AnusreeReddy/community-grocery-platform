@@ -1,25 +1,31 @@
 {
-  "name": "server",
+  "name": "community-grocery-platform-server",
   "version": "1.0.0",
-  "type":"module",
-  "description": "",
+  "type": "module",
+  "description": "Backend API for the Smart Community Grocery Pooling Platform",
   "main": "server.js",
   "scripts": {
-  "start": "node server.js",
-  "dev": "nodemon server.js"
-},
-  "keywords": [],
+    "start": "node server.js",
+    "dev": "nodemon server.js",
+    "lint": "eslint .",
+    "seed": "node scripts/seed.js"
+  },
+  "keywords": ["community", "grocery", "pooling", "express", "mongodb"],
   "author": "",
-  "license": "ISC",
+  "license": "MIT",
   "dependencies": {
     "bcryptjs": "^3.0.3",
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
+    "express-async-errors": "^3.1.1",
     "jsonwebtoken": "^9.0.3",
-    "mongoose": "^9.7.3"
+    "mongoose": "^9.7.3",
+    "swagger-ui-express": "^4.7.0",
+    "yamljs": "^0.3.0"
   },
   "devDependencies": {
-    "nodemon": "^3.1.14"
+    "nodemon": "^3.1.14",
+    "eslint": "^8.57.0"
   }
 }
