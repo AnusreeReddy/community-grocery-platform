@@ -3,10 +3,12 @@ import {
   getAllDeliveries,
   getDeliveryById,
   updateDeliveryStatus,
+  approveDelivery,
+  confirmInventory,
   deleteDelivery,
 } from "./service.js";
 
-import { validateDelivery } from "./validation.js";
+import { validateDelivery, validateDeliveryStatus, validateDeliveryApproval, validateInventoryConfirmation } from "./validation.js";
 
 const create = async (req, res) => {
   try {
@@ -68,6 +70,8 @@ const getById = async (req, res) => {
 
 const updateStatus = async (req, res) => {
   try {
+    const error = validateDeliveryStatus(req.body);
+    if (error) return res.status(400).json({ success: false, message: error });
     const delivery = await updateDeliveryStatus(
       req.params.id,
       req.body.status
@@ -83,6 +87,41 @@ const updateStatus = async (req, res) => {
       success: false,
       message: error.message,
     });
+  }
+};
+
+const approve = async (req, res) => {
+  try {
+    const error = validateDeliveryApproval(req.body);
+    if (error) return res.status(400).json({ success: false, message: error });
+    const delivery = await approveDelivery(
+      req.params.id,
+      req.body.approvalStatus,
+      req.user.id,
+      req.body.note
+    );
+
+    res.status(200).json({
+      success: true,
+      message: "Delivery approval updated successfully.",
+      delivery,
+    });
+  } catch (error) {
+    res.status(400).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+const inventoryConfirmation = async (req, res) => {
+  try {
+    const error = validateInventoryConfirmation(req.body);
+    if (error) return res.status(400).json({ success: false, message: error });
+    const delivery = await confirmInventory(req.params.id, req.body.action, req.user.id, req.body.note);
+    res.status(200).json({ success: true, message: "Inventory confirmation updated successfully.", delivery });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
   }
 };
 
@@ -107,5 +146,7 @@ export {
   getAll,
   getById,
   updateStatus,
+  approve,
+  inventoryConfirmation,
   remove,
 };

@@ -11,6 +11,8 @@ import {
   remove,
   dashboard,
   mergeSuggestions,
+  analytics,
+  bestDeliveryDay,
 } from "./controller.js";
 
 const router = express.Router();
@@ -21,6 +23,8 @@ router.post("/:id/join", protect, join);
 router.post("/leave", protect, leave);
 router.get("/:id/dashboard", protect, dashboard);
 router.get("/:id/merge-suggestions", protect, mergeSuggestions);
+router.get("/:id/analytics", protect, authorize("communityAdmin", "superAdmin"), analytics);
+router.get("/:id/best-delivery-day", protect, authorize("communityAdmin", "superAdmin"), bestDeliveryDay);
 router.get("/:id", getById);
 router.put("/:id", protect, update);
 router.delete("/:id", protect, remove);

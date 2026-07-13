@@ -21,7 +21,8 @@ const create = async (req, res) => {
 
     const order = await placeOrder(
       req.user.id,
-      req.body.deliveryDay
+      req.body.deliveryDay,
+      { enabled: req.body.overrideCutoff, reason: req.body.overrideReason }
     );
 
     res.status(201).json({

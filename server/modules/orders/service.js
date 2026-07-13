@@ -5,7 +5,7 @@ import Community from "../communities/model.js";
 import { evaluateCommunityThreshold } from "../threshold/service.js";
 import { getNextDateForWeekday, hasCutOffPassed } from "../../utils/date.js";
 
-const placeOrder = async (userId, deliveryDay) => {
+const placeOrder = async (userId, deliveryDay, cutoffOverride = {}) => {
   const user = await User.findById(userId);
 
   if (!user) {
@@ -30,9 +30,11 @@ const placeOrder = async (userId, deliveryDay) => {
 
   const deliveryDate = getNextDateForWeekday(deliveryDay);
 
-  if (hasCutOffPassed(deliveryDate, schedule.cutOffTime)) {
+  const overrideAllowed = cutoffOverride.enabled === true && ["communityAdmin", "superAdmin"].includes(user.role);
+  if (hasCutOffPassed(deliveryDate, schedule.cutOffTime) && !overrideAllowed) {
     throw new Error("Order cut off time has passed for the selected delivery day.");
   }
+  if (cutoffOverride.enabled && !overrideAllowed) throw new Error("Only a community administrator can override an order cutoff.");
 
   const cart = await Cart.findOne({ user: userId }).populate("items.product");
 
@@ -51,6 +53,7 @@ const placeOrder = async (userId, deliveryDay) => {
     totalAmount: cart.totalAmount,
     deliveryDay,
     deliveryDate,
+    cutoffOverride: overrideAllowed ? { overriddenBy: userId, overriddenAt: new Date(), reason: cutoffOverride.reason || "" } : undefined,
   });
 
   community.currentOrderValue += order.totalAmount;
@@ -96,6 +99,7 @@ const updateOrderStatus = async (orderId, status) => {
     throw new Error("Order not found.");
   }
 
+  if (!["Pending", "Confirmed", "Packed", "Out for Delivery", "Delivered", "Cancelled"].includes(status)) throw new Error("Invalid order status.");
   order.status = status;
   await order.save();
 

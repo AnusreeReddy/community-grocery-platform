@@ -74,6 +74,12 @@ const orderSchema = new mongoose.Schema(
       ref: "Community",
       default: null,
     },
+
+    cutoffOverride: {
+      overriddenBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+      overriddenAt: Date,
+      reason: { type: String, trim: true, default: "" },
+    },
   },
   {
     timestamps: true,

@@ -55,6 +55,29 @@ const deliverySchema = new mongoose.Schema(
       default: false,
     },
 
+    // A stable key makes creation of an active proposal idempotent even when
+    // multiple orders reach a threshold at the same time.
+    proposalKey: { type: String, unique: true, sparse: true },
+
+    approvalStatus: {
+      type: String,
+      enum: ["Pending", "Approved", "Rejected"],
+      default: "Pending",
+    },
+
+    adminApproval: {
+      actionBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+      actionAt: Date,
+      note: { type: String, trim: true, default: "" },
+    },
+
+    shopkeeperApproval: {
+      status: { type: String, enum: ["Pending", "Accepted", "Rejected"], default: "Pending" },
+      actionBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+      actionAt: Date,
+      note: { type: String, trim: true, default: "" },
+    },
+
     deliveryStatus: {
       type: String,
       enum: [
@@ -72,6 +95,8 @@ const deliverySchema = new mongoose.Schema(
     timestamps: true,
   }
 );
+
+deliverySchema.index({ community: 1, deliveryDate: 1, deliveryDay: 1 });
 
 const Delivery = mongoose.model("Delivery", deliverySchema);
 

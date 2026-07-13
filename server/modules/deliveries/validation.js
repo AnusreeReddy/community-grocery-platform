@@ -16,4 +16,23 @@ const validateDelivery = (data) => {
   return null;
 };
 
-export { validateDelivery };
+const validateDeliveryStatus = (data) => {
+  if (!data?.status) return "Delivery status is required.";
+  return null;
+};
+
+const validateDeliveryApproval = (data) => {
+  if (!data || !["Approved", "Rejected"].includes(data.approvalStatus)) {
+    return "approvalStatus must be Approved or Rejected.";
+  }
+  return null;
+};
+
+const validateInventoryConfirmation = (data) => {
+  if (!data || !["Accepted", "Rejected"].includes(data.action)) {
+    return "action must be Accepted or Rejected.";
+  }
+  return null;
+};
+
+export { validateDelivery, validateDeliveryStatus, validateDeliveryApproval, validateInventoryConfirmation };

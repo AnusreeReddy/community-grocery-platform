@@ -8,6 +8,8 @@ import {
   deleteCommunity,
   getCommunityDashboard,
   getMergeSuggestions,
+  getCommunityAnalytics,
+  getBestDeliveryDayRecommendation,
 } from "./service.js";
 
 import { validateCommunity } from "./validation.js";
@@ -181,6 +183,16 @@ const mergeSuggestions = async (req, res) => {
   }
 };
 
+const analytics = async (req, res) => {
+  try { res.status(200).json({ success: true, analytics: await getCommunityAnalytics(req.params.id) }); }
+  catch (error) { res.status(404).json({ success: false, message: error.message }); }
+};
+
+const bestDeliveryDay = async (req, res) => {
+  try { res.status(200).json({ success: true, recommendation: await getBestDeliveryDayRecommendation(req.params.id) }); }
+  catch (error) { res.status(404).json({ success: false, message: error.message }); }
+};
+
 export {
   create,
   getAll,
@@ -191,4 +203,6 @@ export {
   remove,
   dashboard,
   mergeSuggestions,
+  analytics,
+  bestDeliveryDay,
 };
