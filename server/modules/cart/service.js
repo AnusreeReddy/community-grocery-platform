@@ -31,8 +31,10 @@ const addToCart = async (userId, productId, quantity) => {
   const existingItem = cart.items.find((item) => item.product.toString() === productId);
 
   if (existingItem) {
+    if (existingItem.quantity + quantity > product.stock) throw new Error("Requested quantity exceeds available stock.");
     existingItem.quantity += quantity;
   } else {
+    if (quantity > product.stock) throw new Error("Requested quantity exceeds available stock.");
     cart.items.push({ product: productId, quantity, price: product.price });
   }
 
@@ -56,7 +58,12 @@ const updateCartItem = async (userId, productId, quantity) => {
 
   if (!item) throw new Error("Product not found in cart.");
 
+  const product = await Product.findById(productId);
+  if (!product || !product.isAvailable) throw new Error("Product not found.");
+  if (quantity > product.stock) throw new Error("Requested quantity exceeds available stock.");
+
   item.quantity = quantity;
+  item.price = product.price;
 
   cart.totalAmount = cart.items.reduce((total, item) => total + item.quantity * item.price, 0);
 

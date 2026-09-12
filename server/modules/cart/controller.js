@@ -5,6 +5,7 @@ import {
   removeFromCart,
   clearCart,
 } from "./service.js";
+import { validateCart } from "./validation.js";
 
 const get = async (req, res) => {
   try {
@@ -18,6 +19,8 @@ const get = async (req, res) => {
 
 const add = async (req, res) => {
   try {
+    const error = validateCart(req.body);
+    if (error) return res.status(400).json({ success: false, message: error });
     const { productId, quantity } = req.body;
     const cart = await addToCart(req.user.id, productId, Number(quantity) || 1);
 
@@ -30,6 +33,9 @@ const add = async (req, res) => {
 const update = async (req, res) => {
   try {
     const { quantity } = req.body;
+    if (!Number.isInteger(Number(quantity)) || Number(quantity) < 1) {
+      return res.status(400).json({ success: false, message: "Quantity must be a positive integer." });
+    }
     const cart = await updateCartItem(req.user.id, req.params.productId, Number(quantity));
 
     res.status(200).json({ success: true, message: "Cart updated.", cart });

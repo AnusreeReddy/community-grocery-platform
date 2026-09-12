@@ -33,8 +33,6 @@ const updateUserProfile = async (userId, data) => {
 
   if (data.fullName) user.fullName = data.fullName;
   if (data.email) user.email = data.email.toLowerCase();
-  if (data.community) user.community = data.community;
-
   await user.save();
 
   return user;

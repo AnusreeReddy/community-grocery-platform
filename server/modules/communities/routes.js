@@ -17,15 +17,20 @@ import {
 
 const router = express.Router();
 
+// POST routes
 router.post("/", protect, create);
-router.get("/", getAll);
-router.post("/:id/join", protect, join);
 router.post("/leave", protect, leave);
+router.post("/:id/join", protect, join);
+
+// GET routes (order matters - specific before generic)
+router.get("/", getAll);
 router.get("/:id/dashboard", protect, dashboard);
 router.get("/:id/merge-suggestions", protect, mergeSuggestions);
 router.get("/:id/analytics", protect, authorize("communityAdmin", "superAdmin"), analytics);
 router.get("/:id/best-delivery-day", protect, authorize("communityAdmin", "superAdmin"), bestDeliveryDay);
 router.get("/:id", getById);
+
+// PUT/DELETE routes
 router.put("/:id", protect, update);
 router.delete("/:id", protect, remove);
 

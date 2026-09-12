@@ -32,32 +32,37 @@ const getProductById = async (productId) => {
   return product;
 };
 
-const updateProduct = async (productId, data, userId) => {
+const updateProduct = async (productId, data, userId, userRole) => {
   const product = await Product.findById(productId);
 
   if (!product || !product.isAvailable) {
     throw new Error("Product not found.");
   }
 
-  if (product.shopkeeper.toString() !== userId) {
+  if (userRole !== "superAdmin" && product.shopkeeper.toString() !== userId) {
     throw new Error("Unauthorized.");
   }
 
-  Object.assign(product, data);
+  const allowedFields = ["name", "description", "category", "brand", "price", "stock", "image", "isAvailable"];
+  for (const field of allowedFields) {
+    if (data[field] !== undefined) product[field] = data[field];
+  }
+  if (product.price <= 0) throw new Error("Price must be greater than zero.");
+  if (!Number.isInteger(product.stock) || product.stock < 0) throw new Error("Stock must be a non-negative integer.");
 
   await product.save();
 
   return product;
 };
 
-const deleteProduct = async (productId, userId) => {
+const deleteProduct = async (productId, userId, userRole) => {
   const product = await Product.findById(productId);
 
   if (!product || !product.isAvailable) {
     throw new Error("Product not found.");
   }
 
-  if (product.shopkeeper.toString() !== userId) {
+  if (userRole !== "superAdmin" && product.shopkeeper.toString() !== userId) {
     throw new Error("Unauthorized.");
   }
 

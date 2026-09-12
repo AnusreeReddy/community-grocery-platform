@@ -103,6 +103,8 @@ const communitySchema = new mongoose.Schema(
   }
 );
 
+communitySchema.index({ name: 1, pincode: 1 }, { unique: true });
+
 const Community = mongoose.model("Community", communitySchema);
 
 export default Community;

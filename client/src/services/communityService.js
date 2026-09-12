@@ -35,9 +35,19 @@ const getMergeSuggestions = async (id) => {
   return response.data;
 };
 
+const getBestDeliveryDay = async (id) => {
+  const response = await api.get(`/communities/${id}/best-delivery-day`);
+  return response.data;
+};
+
+const getAnalytics = async (id) => {
+  const response = await api.get(`/communities/${id}/analytics`);
+  return response.data;
+};
+
 const runThresholdEvaluation = async () => {
   const response = await api.post("/threshold/run");
   return response.data;
 };
 
-export { getCommunities, getCommunity, createCommunity, joinCommunity, leaveCommunity, getDashboard, getMergeSuggestions, runThresholdEvaluation };
+export { getCommunities, getCommunity, createCommunity, joinCommunity, leaveCommunity, getDashboard, getMergeSuggestions, getBestDeliveryDay, getAnalytics, runThresholdEvaluation };

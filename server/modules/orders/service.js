@@ -2,6 +2,8 @@ import Order from "./model.js";
 import Cart from "../cart/model.js";
 import User from "../users/model.js";
 import Community from "../communities/model.js";
+import Product from "../products/model.js";
+import Delivery from "../deliveries/model.js";
 import { evaluateCommunityThreshold } from "../threshold/service.js";
 import { getNextDateForWeekday, hasCutOffPassed } from "../../utils/date.js";
 
@@ -42,21 +44,29 @@ const placeOrder = async (userId, deliveryDay, cutoffOverride = {}) => {
     throw new Error("Cart is empty.");
   }
 
+  const productIds = cart.items.map((item) => item.product?._id || item.product);
+  const products = await Product.find({ _id: { $in: productIds }, isAvailable: true });
+  const productsById = new Map(products.map((product) => [product._id.toString(), product]));
+  const orderItems = cart.items.map((item) => {
+    const productId = (item.product?._id || item.product).toString();
+    const product = productsById.get(productId);
+    if (!product) throw new Error("A cart product is no longer available.");
+    if (item.quantity > product.stock) throw new Error(`Insufficient stock for ${product.name}.`);
+    return { product: product._id, quantity: item.quantity, price: product.price };
+  });
+  const totalAmount = orderItems.reduce((total, item) => total + item.quantity * item.price, 0);
+
   const order = await Order.create({
     user: userId,
     community: user.community,
-    items: cart.items.map((item) => ({
-      product: item.product._id || item.product,
-      quantity: item.quantity,
-      price: item.price,
-    })),
-    totalAmount: cart.totalAmount,
+    items: orderItems,
+    totalAmount,
     deliveryDay,
     deliveryDate,
     cutoffOverride: overrideAllowed ? { overriddenBy: userId, overriddenAt: new Date(), reason: cutoffOverride.reason || "" } : undefined,
   });
 
-  community.currentOrderValue += order.totalAmount;
+  community.currentOrderValue += totalAmount;
   await community.save();
 
   cart.items = [];
@@ -121,6 +131,14 @@ const cancelOrder = async (orderId, userId) => {
     throw new Error("Only pending orders can be cancelled.");
   }
 
+  const proposedDelivery = await Delivery.exists({
+    orders: order._id,
+    approvalStatus: "Pending",
+  });
+  if (proposedDelivery) {
+    throw new Error("This order is already included in a delivery proposal and cannot be cancelled individually.");
+  }
+
   const community = await Community.findById(order.community);
 
   if (community) {
@@ -130,6 +148,8 @@ const cancelOrder = async (orderId, userId) => {
 
   order.status = "Cancelled";
   await order.save();
+
+  await evaluateCommunityThreshold(order.community);
 
   return order;
 };

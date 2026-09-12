@@ -3,6 +3,7 @@ import { useAuth } from "../context/AuthContext.jsx";
 import { getCart, updateCartItem, removeFromCart, clearCart } from "../services/cartService.js";
 import { placeOrder } from "../services/orderService.js";
 import { getCommunity } from "../services/communityService.js";
+import api from "../services/api.js";
 
 const Cart = () => {
   const { user } = useAuth();
@@ -10,6 +11,7 @@ const Cart = () => {
   const [deliveryDays, setDeliveryDays] = useState([]);
   const [deliveryDay, setDeliveryDay] = useState("");
   const [message, setMessage] = useState("");
+  const [bestDay, setBestDay] = useState(null);
 
   const loadCart = () => {
     getCart().then((resp) => setCart(resp.cart)).catch(() => setMessage("Could not load cart."));
@@ -24,6 +26,11 @@ const Cart = () => {
           setDeliveryDays(schedule);
           setDeliveryDay(schedule[0]?.day || "");
         })
+        .catch(() => {});
+
+      // Load best delivery day recommendation
+      api.get(`/communities/${user.community}/best-delivery-day`)
+        .then((resp) => setBestDay(resp.data.recommendation))
         .catch(() => {});
     }
   }, [user]);
@@ -72,6 +79,16 @@ const Cart = () => {
         <p className="mt-2 text-slate-600">Review your items before checkout.</p>
       </div>
       {message && <div className="rounded-3xl bg-slate-100 p-4 text-slate-700">{message}</div>}
+
+      {/* Best Delivery Day Recommendation */}
+      {bestDay && (
+        <div className="rounded-3xl bg-gradient-to-r from-blue-50 to-cyan-50 border border-blue-200 p-4 shadow-sm">
+          <p className="text-sm font-medium text-blue-900">💡 Recommended:</p>
+          <p className="mt-1 text-lg font-semibold text-blue-700">{bestDay.recommendedDeliveryDay}</p>
+          <p className="text-xs text-blue-600 mt-2">Based on community order history - most popular delivery day</p>
+        </div>
+      )}
+
       <div className="rounded-3xl bg-white p-6 shadow-sm">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <h2 className="text-xl font-semibold text-slate-900">Your items</h2>

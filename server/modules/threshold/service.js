@@ -1,6 +1,7 @@
 import Community from "../communities/model.js";
 import Order from "../orders/model.js";
 import Delivery from "../deliveries/model.js";
+import { createNotification } from "../notifications/service.js";
 import { getNextDateForWeekday } from "../../utils/date.js";
 
 const calculateTotalAmount = (orders) =>
@@ -90,6 +91,12 @@ const createDeliveryProposals = async (community, orders) => {
         deliveryStatus: "Scheduled",
       });
       deliveries.push(delivery);
+      await Promise.all(groupedOrders.map((order) => createNotification(
+        order.user,
+        "delivery_proposed",
+        `A delivery proposal was created for ${deliveryDay}.`,
+        { deliveryId: delivery._id, communityId: community._id }
+      )));
     } catch (error) {
       // Another request won the race to create this proposal. It is safe to
       // treat Mongo's uniqueness error as an idempotent result.

@@ -77,7 +77,8 @@ const update = async (req, res) => {
     const product = await updateProduct(
       req.params.id,
       req.body,
-      req.user.id
+      req.user.id,
+      req.user.role
     );
 
     res.status(200).json({
@@ -97,7 +98,8 @@ const remove = async (req, res) => {
   try {
     const product = await deleteProduct(
       req.params.id,
-      req.user.id
+      req.user.id,
+      req.user.role
     );
 
     res.status(200).json({
