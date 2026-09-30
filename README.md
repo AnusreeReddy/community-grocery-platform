@@ -741,6 +741,7 @@ This model can potentially benefit multiple participants:
 - Better opportunity for route planning
 
 ---
+Added documentation for nearby community discovery and dynamic delivery route optimization.
 
 ## 👨‍💻 Project
 
